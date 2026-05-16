@@ -2,30 +2,31 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 // Auth pages
-import Login    from "../pages/auth/Login";
+import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
 // Super Admin
 import SuperAdminDashboard from "../pages/super_admin/SuperAdminDashboard";
-import ManageUsers         from "../pages/super_admin/ManageUsers";
+import ManageUsers from "../pages/super_admin/ManageUsers";
 
 // Admin
 import AdminDashboard from "../pages/admin/AdminDashboard";
 
 // Hospital
 import HospitalDashboard from "../pages/hospital/HospitalDashboard";
-import HospitalProfile   from "../pages/hospital/HospitalProfile";
-import BloodRequests     from "../pages/hospital/BloodRequests";
+import HospitalProfile from "../pages/hospital/HospitalProfile";
+import BloodRequests from "../pages/hospital/BloodRequests";
 import HospitalInventory from "../pages/hospital/HospitalInventory";
+import HospitalAppointments from "../pages/hospital/HospitalAppointments";
 
 // Donor
 import DonorDashboard from "../pages/donor/DonorDashboard";
-import DonorProfile   from "../pages/donor/DonorProfile";
-import Appointments   from "../pages/donor/Appointments";
+import DonorProfile from "../pages/donor/DonorProfile";
+import Appointments from "../pages/donor/Appointments";
 
-import NotFound       from "../pages/NotFound";
+import NotFound from "../pages/NotFound";
 import ProtectedRoute from "./ProtectedRoute";
-import RoleRoute      from "./RoleRoute";
+import RoleRoute from "./RoleRoute";
 
 const AppRouter = () => {
   const { isAuthenticated, dashboardRoute } = useAuth();
@@ -84,6 +85,15 @@ const AppRouter = () => {
             </RoleRoute>
           }
         />
+
+        <Route path="/hospital/appointments"
+          element={
+            <RoleRoute allowedRoles={["HOSPITAL_STAFF"]}>
+              <HospitalAppointments />
+            </RoleRoute>
+          }
+        />
+
         <Route path="/hospital/profile"
           element={
             <RoleRoute allowedRoles={["HOSPITAL_STAFF"]}>
