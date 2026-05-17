@@ -41,19 +41,32 @@ const Appointments = () => {
   });
 
   const fetchAll = async () => {
-    setLoading(true);
-    try {
-      const [apptRes, hospRes, reqRes] = await Promise.all([
-        axiosInstance.get(ENDPOINTS.MY_APPOINTMENTS),
-        axiosInstance.get(ENDPOINTS.ALL_HOSPITALS),
-        axiosInstance.get(ENDPOINTS.OPEN_REQUESTS),
-      ]);
-      setAppointments(apptRes.data.data || []);
-      setHospitals(hospRes.data.data    || []);
-      setOpenReqs(reqRes.data.data      || []);
-    } catch { toast.error("Failed to load appointments"); }
-    finally  { setLoading(false); }
-  };
+  setLoading(true);
+  try {
+    // Run independently — one failure won't kill the others
+    const [apptRes, hospRes, reqRes] = await Promise.allSettled([
+      axiosInstance.get(ENDPOINTS.MY_APPOINTMENTS),
+      axiosInstance.get(ENDPOINTS.ALL_HOSPITALS),
+      axiosInstance.get(ENDPOINTS.OPEN_REQUESTS),
+    ]);
+
+    if (apptRes.status === "fulfilled") {
+      setAppointments(apptRes.value.data.data || []);
+    }
+    if (hospRes.status === "fulfilled") {
+      setHospitals(hospRes.value.data.data || []);
+    } else {
+      toast.error("Failed to load hospitals");
+    }
+    if (reqRes.status === "fulfilled") {
+      setOpenReqs(reqRes.value.data.data || []);
+    }
+  } catch (err) {
+    toast.error("Failed to load data");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => { fetchAll(); }, []);
 

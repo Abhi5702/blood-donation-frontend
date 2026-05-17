@@ -8,6 +8,7 @@ import Register from "../pages/auth/Register";
 // Super Admin
 import SuperAdminDashboard from "../pages/super_admin/SuperAdminDashboard";
 import ManageUsers from "../pages/super_admin/ManageUsers";
+import DonorBloodRequests from "../pages/donor/BloodRequests";
 
 // Admin
 import AdminDashboard from "../pages/admin/AdminDashboard";
@@ -46,6 +47,22 @@ const AppRouter = () => {
             ? <Navigate to={dashboardRoute} replace />
             : <Register />}
         />
+
+        <Route path="/super-admin/users"
+  element={
+    <RoleRoute allowedRoles={["SUPER_ADMIN"]}>
+      <ManageUsers />
+    </RoleRoute>
+  }
+/>
+
+<Route path="/donor/requests"
+  element={
+    <RoleRoute allowedRoles={["DONOR"]}>
+      <DonorBloodRequests />
+    </RoleRoute>
+  }
+/>
 
         {/* Root redirect */}
         <Route path="/"
