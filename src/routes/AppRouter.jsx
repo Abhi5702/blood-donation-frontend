@@ -12,6 +12,9 @@ import DonorBloodRequests from "../pages/donor/BloodRequests";
 
 // Admin
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import AdminDonors from "../pages/admin/AdminDonors";
+import AdminAppointments from "../pages/admin/AdminAppointments";
+import AdminRequests from "../pages/admin/AdminRequests";
 
 // Hospital
 import HospitalDashboard from "../pages/hospital/HospitalDashboard";
@@ -56,13 +59,8 @@ const AppRouter = () => {
   }
 />
 
-<Route path="/donor/requests"
-  element={
-    <RoleRoute allowedRoles={["DONOR"]}>
-      <DonorBloodRequests />
-    </RoleRoute>
-  }
-/>
+
+
 
         {/* Root redirect */}
         <Route path="/"
@@ -93,6 +91,32 @@ const AppRouter = () => {
             </RoleRoute>
           }
         />
+
+        <Route path="/admin/donors"
+          element={
+            <RoleRoute allowedRoles={["ADMIN"]}>
+              <AdminDonors />
+            </RoleRoute>
+          }
+        />
+
+        <Route path="/admin/requests"
+  element={
+    <RoleRoute allowedRoles={["ADMIN"]}>
+      <AdminRequests />
+    </RoleRoute>
+  }
+/>
+
+<Route path="/admin/appointments"
+  element={
+    <RoleRoute allowedRoles={["ADMIN"]}>
+      <  AdminAppointments    />
+    </RoleRoute>
+  }
+/>
+
+
 
         {/* HOSPITAL_STAFF */}
         <Route path="/hospital/dashboard"
