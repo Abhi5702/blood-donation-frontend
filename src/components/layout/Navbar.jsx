@@ -147,9 +147,9 @@ const Navbar = ({ onMobileToggle, mobileOpen }) => {
 
         <a href="/" className="bdms-nav-brand">
           <div className="bdms-nav-brand-icon">
-            <Droplets size={18} color="#fff" />
-          </div>
-          <span className="bdms-nav-brand-name">Blood<span>Link</span></span>
+  <img src="/logo.png" alt="BloodLink" style={{ width: "22px", height: "22px", objectFit: "contain" }} />
+</div>
+          <span className="bdms-nav-brand-name">Blood<span>Bridge</span></span>
         </a>
 
         <div className="bdms-nav-divider" />
