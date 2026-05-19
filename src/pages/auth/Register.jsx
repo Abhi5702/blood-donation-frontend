@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Mail, Lock, User, ArrowRight,
-  LoaderCircle, Droplets, ChevronDown
+  LoaderCircle, Droplets
 } from "lucide-react";
 import axiosInstance from "../../api/axiosInstance";
 import { ENDPOINTS } from "../../api/endpoints";
@@ -20,6 +20,7 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
+  const [focused, setFocused] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (key, value) => {
@@ -28,24 +29,22 @@ const Register = () => {
   };
 
   const getStrength = (pw) => {
-    if (!pw)        return null;
-    if (pw.length < 6)  return { level: 1, label: "Weak",   color: "#ef4444" };
-    if (pw.length < 10) return { level: 2, label: "Fair",   color: "#f59e0b" };
-    return               { level: 3, label: "Strong", color: "#22c55e" };
+    if (!pw)           return null;
+    if (pw.length < 6) return { level: 1, label: "Weak",   color: "#e74c3c" };
+    if (pw.length < 10)return { level: 2, label: "Fair",   color: "#e67e22" };
+    return                    { level: 3, label: "Strong", color: "#27ae60" };
   };
   const strength = getStrength(form.password);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!form.fullName.trim()) { setError("Full name is required");  return; }
     if (!form.email.trim())    { setError("Email is required");       return; }
     if (!form.password.trim()) { setError("Password is required");    return; }
     if (form.password.length < 8) {
       setError("Password must be at least 8 characters"); return;
     }
-
     setLoading(true);
     try {
       await axiosInstance.post(ENDPOINTS.REGISTER, form);
@@ -53,352 +52,384 @@ const Register = () => {
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Try again.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap');
+
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .bdms-reg-root {
-          min-height: 100vh; width: 100%; display: flex;
-          font-family: 'Outfit', sans-serif; overflow: hidden;
+        .rg-root {
+          min-height: 100vh;
+          width: 100%;
+          background: #f5f2ed;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          font-family: 'Manrope', sans-serif;
+          overflow: hidden;
         }
 
-        /* ── LEFT ── */
-        .bdms-reg-left {
-          flex: 1; position: relative;
-          display: flex; flex-direction: column;
-          padding: 48px 52px; overflow: hidden; justify-content: space-between;
+        /* ── LEFT — editorial poster ── */
+        .rg-poster {
+          background: #0f1923;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 48px;
+          overflow: hidden;
         }
-        .bdms-reg-left-bg {
+        .rg-dots {
           position: absolute; inset: 0;
-          background: linear-gradient(145deg, #1a0000 0%, #3d0000 40%, #7f1d1d 100%);
-          z-index: 0;
+          background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+          background-size: 24px 24px; z-index: 0;
         }
-        .bdms-reg-grid {
-          position: absolute; inset: 0; z-index: 1;
-          background-image:
-            linear-gradient(rgba(220,38,38,0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(220,38,38,0.08) 1px, transparent 1px);
-          background-size: 40px 40px;
+        .rg-slash {
+          position: absolute; width: 3px; height: 180%;
+          background: linear-gradient(180deg, transparent 0%, #c0392b 30%, #e74c3c 60%, transparent 100%);
+          top: -40%; left: 52%; transform: rotate(-18deg); z-index: 1; opacity: 0.35;
         }
-        .bdms-reg-orb1 {
-          position: absolute; width: 500px; height: 500px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(220,38,38,0.2) 0%, transparent 65%);
-          bottom: -150px; left: -100px; z-index: 1; filter: blur(20px);
-          animation: regOrbF 8s ease-in-out infinite alternate;
+        .rg-slash2 {
+          position: absolute; width: 1px; height: 180%;
+          background: linear-gradient(180deg, transparent 0%, #c0392b 40%, transparent 100%);
+          top: -40%; left: 58%; transform: rotate(-18deg); z-index: 1; opacity: 0.18;
         }
-        @keyframes regOrbF { from{transform:translateY(0)} to{transform:translateY(-24px)} }
-
-        .bdms-reg-inner {
+        .rg-watermark {
+          position: absolute; bottom: -20px; left: -10px;
+          font-family: 'Playfair Display', serif;
+          font-size: 160px; font-weight: 700;
+          color: rgba(255,255,255,0.025); letter-spacing: -8px;
+          line-height: 1; z-index: 0; user-select: none; white-space: nowrap;
+        }
+        .rg-poster-inner {
           position: relative; z-index: 2; height: 100%;
           display: flex; flex-direction: column; justify-content: space-between;
         }
-        .bdms-reg-brand { display: flex; align-items: center; gap: 12px; }
-        .bdms-reg-brand-icon {
-          width: 44px; height: 44px; border-radius: 12px;
-          background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.3);
+        .rg-logo { display: flex; align-items: center; gap: 10px; }
+        .rg-logo-mark {
+          width: 36px; height: 36px;
+          border: 1.5px solid rgba(192,57,43,0.6); border-radius: 6px;
           display: flex; align-items: center; justify-content: center;
         }
-        .bdms-reg-brand-name {
-          font-family: 'Syne', sans-serif; font-size: 22px;
-          font-weight: 700; color: #fff; letter-spacing: -0.02em;
+        .rg-logo-text {
+          font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+          color: rgba(255,255,255,0.7); letter-spacing: 0.08em; text-transform: uppercase;
         }
-        .bdms-reg-brand-name span { color: #fca5a5; }
+        .rg-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .rg-eyebrow {
+          font-family: 'DM Mono', monospace; font-size: 10px; color: #c0392b;
+          letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 20px;
+          display: flex; align-items: center; gap: 10px;
+        }
+        .rg-eyebrow::before { content: ''; display: block; width: 32px; height: 1px; background: #c0392b; }
+        .rg-headline {
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(40px, 4.5vw, 68px); font-weight: 400;
+          color: #ffffff; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 28px;
+        }
+        .rg-headline em { font-style: italic; color: #e74c3c; }
+        .rg-desc {
+          font-size: 13px; color: rgba(255,255,255,0.38);
+          line-height: 1.8; max-width: 300px; font-weight: 300;
+        }
+        .rg-steps { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+        .rg-step { display: flex; align-items: flex-start; gap: 14px; }
+        .rg-step-num {
+          font-family: 'DM Mono', monospace; font-size: 10px; color: #c0392b;
+          letter-spacing: 0.1em; padding-top: 2px; flex-shrink: 0; min-width: 20px;
+        }
+        .rg-step-title { font-size: 12px; color: rgba(255,255,255,0.7); }
+        .rg-step-desc  { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
 
-        .bdms-reg-hero { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .bdms-reg-headline {
-          font-family: 'Syne', sans-serif;
-          font-size: clamp(34px, 4vw, 54px); font-weight: 800;
-          color: #fff; line-height: 1.0; letter-spacing: -0.03em; margin-bottom: 20px;
-        }
-        .bdms-reg-headline .red { color: #f87171; }
-        .bdms-reg-desc {
-          font-size: 14px; color: rgba(255,255,255,0.45);
-          line-height: 1.75; max-width: 360px; margin-bottom: 36px;
-        }
-
-        .bdms-reg-steps { display: flex; flex-direction: column; gap: 16px; }
-        .bdms-reg-step { display: flex; align-items: flex-start; gap: 14px; }
-        .bdms-reg-step-dot {
-          width: 28px; height: 28px; border-radius: 50%;
-          border: 1px solid rgba(220,38,38,0.4);
-          background: rgba(220,38,38,0.1);
+        /* ── RIGHT — form ── */
+        .rg-form-side {
+          background: #f5f2ed;
           display: flex; align-items: center; justify-content: center;
-          font-size: 11px; color: #f87171; font-weight: 500; flex-shrink: 0;
+          padding: 48px 64px; position: relative; overflow-y: auto;
         }
-        .bdms-reg-step-title { font-size: 13px; color: #fff; }
-        .bdms-reg-step-desc  { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .rg-form-side::before {
+          content: ''; position: absolute; inset: 0;
+          background-image: repeating-linear-gradient(
+            0deg, transparent, transparent 31px,
+            rgba(0,0,0,0.04) 31px, rgba(0,0,0,0.04) 32px
+          );
+          pointer-events: none;
+        }
+        .rg-form-wrap {
+          width: 100%; max-width: 400px; position: relative; z-index: 1;
+        }
+        .rg-form-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 36px; padding-bottom: 16px; border-bottom: 2px solid #0f1923;
+        }
+        .rg-form-header-title {
+          font-family: 'Playfair Display', serif; font-size: 13px;
+          font-weight: 400; color: #0f1923; letter-spacing: 0.02em;
+        }
+        .rg-form-header-meta {
+          font-family: 'DM Mono', monospace; font-size: 10px;
+          color: #999; letter-spacing: 0.1em; text-transform: uppercase;
+        }
+        .rg-form-title {
+          font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700;
+          color: #0f1923; line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 6px;
+        }
+        .rg-form-sub { font-size: 13px; color: #888; font-weight: 300; margin-bottom: 28px; }
 
-        /* ── RIGHT ── */
-        .bdms-reg-right {
-          width: 500px; flex-shrink: 0; background: #fafafa;
-          border-left: 1px solid #fee2e2;
-          display: flex; align-items: center; justify-content: center;
-          position: relative; overflow: hidden; padding: 40px 44px;
+        /* role selector */
+        .rg-role-section { margin-bottom: 24px; }
+        .rg-role-section-label {
+          font-family: 'DM Mono', monospace; font-size: 10px; color: #666;
+          letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px; display: block;
         }
-        .bdms-reg-right-glow {
-          position: absolute; bottom: -80px; right: -60px;
-          width: 280px; height: 280px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(220,38,38,0.05) 0%, transparent 65%);
-          z-index: 0;
+        .rg-roles { display: flex; gap: 0; border-bottom: 1.5px solid #ccc; }
+        .rg-role-tab {
+          flex: 1; padding: 8px 4px 10px; text-align: center; cursor: pointer;
+          border-bottom: 2px solid transparent; margin-bottom: -1.5px;
+          transition: all .15s;
         }
+        .rg-role-tab.active { border-bottom-color: #c0392b; }
+        .rg-role-tab-name {
+          font-family: 'DM Mono', monospace; font-size: 10px;
+          color: #bbb; letter-spacing: 0.1em; text-transform: uppercase;
+          transition: color .15s;
+        }
+        .rg-role-tab.active .rg-role-tab-name { color: #c0392b; }
+        .rg-role-tab-desc { font-size: 10px; color: #ccc; margin-top: 2px; }
+        .rg-role-tab.active .rg-role-tab-desc { color: #888; }
 
-        .bdms-reg-card { position: relative; z-index: 1; width: 100%; max-width: 400px; }
-        .bdms-reg-tag {
-          display: inline-flex; align-items: center; gap: 6px;
-          font-size: 10px; font-weight: 500; letter-spacing: 0.15em;
-          text-transform: uppercase; color: #dc2626;
-          background: #fee2e2; border: 1px solid #fecaca;
-          padding: 4px 10px; border-radius: 4px; margin-bottom: 16px;
+        /* fields */
+        .rg-field { margin-bottom: 20px; }
+        .rg-label {
+          display: block; font-family: 'DM Mono', monospace; font-size: 10px;
+          color: #666; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px;
         }
-        .bdms-reg-title {
-          font-family: 'Syne', sans-serif; font-size: 30px;
-          font-weight: 700; color: #111; line-height: 1.05;
-          letter-spacing: -0.02em; margin-bottom: 6px;
+        .rg-input-wrap { position: relative; }
+        .rg-input-icon {
+          position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+          color: #bbb; pointer-events: none; transition: color .2s;
         }
-        .bdms-reg-sub { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
+        .rg-input-icon.active { color: #c0392b; }
+        .rg-input {
+          width: 100%; padding: 10px 0 10px 28px; background: transparent;
+          border: none; border-bottom: 1.5px solid #ccc;
+          font-size: 14px; font-family: 'Manrope', sans-serif;
+          font-weight: 400; color: #0f1923; outline: none; transition: border-color .2s; border-radius: 0;
+        }
+        .rg-input::placeholder { color: #bbb; }
+        .rg-input:focus { border-bottom-color: #c0392b; }
+        .rg-input.active-border { border-bottom-color: #c0392b; }
 
-        /* Role selector */
-        .bdms-reg-roles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-        .bdms-reg-role-label {
-          font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
-          text-transform: uppercase; color: #374151; margin-bottom: 4px; display: block;
-        }
-        .bdms-reg-role-option {
-          display: flex; align-items: center; gap: 12px;
-          padding: 10px 14px; border-radius: 9px; cursor: pointer;
-          border: 1.5px solid #e5e7eb; background: #fff; transition: all .15s;
-        }
-        .bdms-reg-role-option.selected {
-          border-color: #dc2626; background: #fff5f5;
-        }
-        .bdms-reg-role-option:hover { border-color: #fca5a5; }
-        .bdms-reg-role-radio {
-          width: 16px; height: 16px; border-radius: 50%;
-          border: 2px solid #d1d5db; flex-shrink: 0; transition: all .15s;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .bdms-reg-role-option.selected .bdms-reg-role-radio {
-          border-color: #dc2626;
-          background: #dc2626;
-        }
-        .bdms-reg-role-radio-dot {
-          width: 6px; height: 6px; border-radius: 50%; background: #fff;
-        }
-        .bdms-reg-role-name  { font-size: 13px; font-weight: 500; color: #111; }
-        .bdms-reg-role-desc  { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+        /* strength */
+        .rg-strength { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+        .rg-bars { display: flex; gap: 4px; }
+        .rg-bar { width: 32px; height: 2px; background: #ddd; transition: background .3s; }
+        .rg-strength-lbl { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; }
 
-        /* Fields */
-        .bdms-reg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .bdms-reg-field { margin-bottom: 14px; }
-        .bdms-reg-label {
-          display: block; font-size: 10px; font-weight: 500;
-          letter-spacing: 0.12em; text-transform: uppercase;
-          color: #374151; margin-bottom: 7px;
+        /* error */
+        .rg-error {
+          font-family: 'DM Mono', monospace; font-size: 11px; color: #c0392b;
+          margin-bottom: 18px; display: flex; align-items: center; gap: 6px;
         }
-        .bdms-reg-input-wrap { position: relative; }
-        .bdms-reg-input-icon {
-          position: absolute; left: 13px; top: 50%;
-          transform: translateY(-50%); color: #d1a0a0; pointer-events: none;
-        }
-        .bdms-reg-input {
-          width: 100%; padding: 11px 12px 11px 40px;
-          background: #fff; border: 1.5px solid #e5e7eb;
-          border-radius: 9px; font-size: 13px;
-          font-family: 'Outfit', sans-serif; color: #111;
-          outline: none; transition: all .15s; box-sizing: border-box;
-        }
-        .bdms-reg-input::placeholder { color: #9ca3af; }
-        .bdms-reg-input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
+        .rg-error::before { content: '⚠'; }
 
-        /* password strength */
-        .bdms-reg-strength { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
-        .bdms-reg-bars { display: flex; gap: 4px; }
-        .bdms-reg-bar { width: 28px; height: 3px; border-radius: 2px; background: #e5e7eb; transition: background .3s; }
-        .bdms-reg-strength-lbl { font-size: 11px; }
+        /* submit */
+        .rg-submit {
+          width: 100%; padding: 14px 24px; background: #0f1923; color: #fff;
+          border: none; border-radius: 0; font-family: 'DM Mono', monospace;
+          font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          gap: 12px; transition: all .2s; position: relative; overflow: hidden; margin-top: 8px;
+        }
+        .rg-submit::after {
+          content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+          width: 0; background: #c0392b; transition: width .3s ease; z-index: 0;
+        }
+        .rg-submit:hover::after { width: 100%; }
+        .rg-submit span { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
+        .rg-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .rg-submit:disabled::after { display: none; }
 
-        .bdms-reg-error {
-          display: flex; align-items: center; gap: 8px;
-          padding: 10px 14px; background: #fef2f2;
-          border: 1px solid #fecaca; border-radius: 8px;
-          font-size: 13px; color: #dc2626; margin-bottom: 14px;
+        .rg-footer {
+          margin-top: 24px; font-size: 12px; color: #999;
+          font-weight: 300; display: flex; align-items: center; gap: 6px;
         }
-
-        .bdms-reg-btn {
-          width: 100%; padding: 13px 24px; background: #dc2626;
-          color: #fff; border: none; border-radius: 9px;
-          font-size: 13px; font-weight: 600; letter-spacing: 0.06em;
-          font-family: 'Syne', sans-serif; cursor: pointer;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-          transition: all .15s; box-shadow: 0 2px 12px rgba(220,38,38,0.3);
+        .rg-footer a {
+          color: #c0392b; text-decoration: none; font-weight: 500;
+          font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
         }
-        .bdms-reg-btn:hover:not(:disabled) {
-          background: #b91c1c;
-          box-shadow: 0 4px 20px rgba(220,38,38,0.4);
-          transform: translateY(-1px);
-        }
-        .bdms-reg-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        .bdms-reg-footer { text-align: center; font-size: 12px; color: #6b7280; margin-top: 16px; }
-        .bdms-reg-footer a {
-          color: #dc2626; font-weight: 500; text-decoration: none; margin-left: 4px;
-        }
-        .bdms-reg-footer a:hover { text-decoration: underline; }
+        .rg-footer a:hover { text-decoration: underline; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
-        .bdms-reg-spin { animation: spin .8s linear infinite; }
+        .rg-spin { animation: spin .8s linear infinite; }
 
-        @media (max-width: 900px) {
-          .bdms-reg-left { display: none; }
-          .bdms-reg-right { width: 100%; border-left: none; }
+        @media (max-width: 860px) {
+          .rg-root { grid-template-columns: 1fr; }
+          .rg-poster { display: none; }
+          .rg-form-side { padding: 40px 32px; }
         }
       `}</style>
 
-      <div className="bdms-reg-root">
+      <div className="rg-root">
 
-        {/* ── LEFT ── */}
-        <div className="bdms-reg-left">
-          <div className="bdms-reg-left-bg" />
-          <div className="bdms-reg-grid" />
-          <div className="bdms-reg-orb1" />
-          <div className="bdms-reg-inner">
-            <div className="bdms-reg-brand">
-              <div className="bdms-reg-brand-icon">
-                <Droplets size={22} color="#f87171" />
+        {/* ── LEFT POSTER ── */}
+        <div className="rg-poster">
+          <div className="rg-dots" />
+          <div className="rg-slash" />
+          <div className="rg-slash2" />
+          <div className="rg-watermark">BLOOD</div>
+
+          <div className="rg-poster-inner">
+            <div className="rg-logo">
+              <div className="rg-logo-mark">
+                <Droplets size={16} color="#e74c3c" />
               </div>
-              <div className="bdms-reg-brand-name">Blood<span>Link</span></div>
+              <span className="rg-logo-text">Blood Bridge</span>
             </div>
-            <div className="bdms-reg-hero">
-              <h1 className="bdms-reg-headline">
-                Join the<br /><span className="red">movement.</span>
+
+            <div className="rg-hero">
+              <div className="rg-eyebrow">Blood Donation Network</div>
+              <h1 className="rg-headline">
+                Join the<br />
+                <em>movement.</em>
               </h1>
-              <p className="bdms-reg-desc">
+              <p className="rg-desc">
                 Become part of a network that saves lives every day.
                 Connect donors, hospitals, and coordinators in one platform.
               </p>
-              <div className="bdms-reg-steps">
+              <div className="rg-steps">
                 {[
                   { n: "01", title: "Create your profile",   desc: "Register as donor, hospital, or admin" },
                   { n: "02", title: "Get matched instantly", desc: "Find compatible donors nearby"          },
                   { n: "03", title: "Save lives",            desc: "Coordinate, donate, and track impact"  },
                 ].map(s => (
-                  <div className="bdms-reg-step" key={s.n}>
-                    <div className="bdms-reg-step-dot">{s.n}</div>
+                  <div className="rg-step" key={s.n}>
+                    <div className="rg-step-num">{s.n}</div>
                     <div>
-                      <div className="bdms-reg-step-title">{s.title}</div>
-                      <div className="bdms-reg-step-desc">{s.desc}</div>
+                      <div className="rg-step-title">{s.title}</div>
+                      <div className="rg-step-desc">{s.desc}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+
+           
           </div>
         </div>
 
-        {/* ── RIGHT ── */}
-        <div className="bdms-reg-right">
-          <div className="bdms-reg-right-glow" />
-          <div className="bdms-reg-card">
+        {/* ── RIGHT FORM ── */}
+        <div className="rg-form-side">
+          <div className="rg-form-wrap">
 
-            <div className="bdms-reg-tag">✦ Get Started</div>
-            <h2 className="bdms-reg-title">Create your<br />account.</h2>
-            <p className="bdms-reg-sub">Fill in your details to join the network</p>
+            <div className="rg-form-header">
+              <span className="rg-form-header-title">New Member</span>
+              <span className="rg-form-header-meta">Blood Bridge / Register</span>
+            </div>
+
+            <div className="rg-form-title">Sign up.</div>
+            <div className="rg-form-sub">Create your account to get started</div>
 
             <form onSubmit={handleSubmit}>
 
-              {/* Role selector */}
-              <span className="bdms-reg-role-label">I am joining as</span>
-              <div className="bdms-reg-roles">
-                {ROLES.map(r => (
-                  <div
-                    key={r.value}
-                    className={`bdms-reg-role-option ${form.role === r.value ? "selected" : ""}`}
-                    onClick={() => handleChange("role", r.value)}
-                  >
-                    <div className="bdms-reg-role-radio">
-                      {form.role === r.value && <div className="bdms-reg-role-radio-dot" />}
+              {/* Role selector — tab style */}
+              <div className="rg-role-section">
+                <span className="rg-role-section-label">Joining as</span>
+                <div className="rg-roles">
+                  {ROLES.map(r => (
+                    <div
+                      key={r.value}
+                      className={`rg-role-tab ${form.role === r.value ? "active" : ""}`}
+                      onClick={() => handleChange("role", r.value)}
+                    >
+                      <div className="rg-role-tab-name">{r.label}</div>
+                      <div className="rg-role-tab-desc">{r.desc}</div>
                     </div>
-                    <div>
-                      <div className="bdms-reg-role-name">{r.label}</div>
-                      <div className="bdms-reg-role-desc">{r.desc}</div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              {/* Name + Email */}
-              <div className="bdms-reg-row">
-                <div className="bdms-reg-field">
-                  <label className="bdms-reg-label">Full Name</label>
-                  <div className="bdms-reg-input-wrap">
-                    <User size={14} className="bdms-reg-input-icon" />
-                    <input
-                      className="bdms-reg-input"
-                      type="text" placeholder="John Doe"
-                      value={form.fullName}
-                      onChange={e => handleChange("fullName", e.target.value)}
-                    />
-                  </div>
+              {/* Full Name */}
+              <div className="rg-field">
+                <label className="rg-label">Full Name</label>
+                <div className="rg-input-wrap">
+                  <User size={14} className={`rg-input-icon ${focused === "name" ? "active" : ""}`} />
+                  <input
+                    className={`rg-input ${focused === "name" ? "active-border" : ""}`}
+                    type="text"
+                    placeholder="John Doe"
+                    value={form.fullName}
+                    onChange={e => handleChange("fullName", e.target.value)}
+                    onFocus={() => setFocused("name")}
+                    onBlur={() => setFocused("")}
+                  />
                 </div>
-                <div className="bdms-reg-field">
-                  <label className="bdms-reg-label">Email</label>
-                  <div className="bdms-reg-input-wrap">
-                    <Mail size={14} className="bdms-reg-input-icon" />
-                    <input
-                      className="bdms-reg-input"
-                      type="email" placeholder="you@example.com"
-                      value={form.email}
-                      onChange={e => handleChange("email", e.target.value)}
-                    />
-                  </div>
+              </div>
+
+              {/* Email */}
+              <div className="rg-field">
+                <label className="rg-label">Email address</label>
+                <div className="rg-input-wrap">
+                  <Mail size={14} className={`rg-input-icon ${focused === "email" ? "active" : ""}`} />
+                  <input
+                    className={`rg-input ${focused === "email" ? "active-border" : ""}`}
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={e => handleChange("email", e.target.value)}
+                    onFocus={() => setFocused("email")}
+                    onBlur={() => setFocused("")}
+                  />
                 </div>
               </div>
 
               {/* Password */}
-              <div className="bdms-reg-field">
-                <label className="bdms-reg-label">Password</label>
-                <div className="bdms-reg-input-wrap">
-                  <Lock size={14} className="bdms-reg-input-icon" />
+              <div className="rg-field">
+                <label className="rg-label">Password</label>
+                <div className="rg-input-wrap">
+                  <Lock size={14} className={`rg-input-icon ${focused === "pass" ? "active" : ""}`} />
                   <input
-                    className="bdms-reg-input"
-                    type="password" placeholder="Min. 8 characters"
+                    className={`rg-input ${focused === "pass" ? "active-border" : ""}`}
+                    type="password"
+                    placeholder="Min. 8 characters"
                     value={form.password}
                     onChange={e => handleChange("password", e.target.value)}
+                    onFocus={() => setFocused("pass")}
+                    onBlur={() => setFocused("")}
                   />
                 </div>
                 {strength && (
-                  <div className="bdms-reg-strength">
-                    <div className="bdms-reg-bars">
+                  <div className="rg-strength">
+                    <div className="rg-bars">
                       {[1, 2, 3].map(i => (
-                        <div key={i} className="bdms-reg-bar"
+                        <div key={i} className="rg-bar"
                           style={{ background: i <= strength.level ? strength.color : undefined }}
                         />
                       ))}
                     </div>
-                    <span className="bdms-reg-strength-lbl" style={{ color: strength.color }}>
+                    <span className="rg-strength-lbl" style={{ color: strength.color }}>
                       {strength.label}
                     </span>
                   </div>
                 )}
               </div>
 
-              {error && <div className="bdms-reg-error">⚠ {error}</div>}
+              {error && <div className="rg-error">{error}</div>}
 
-              <button type="submit" className="bdms-reg-btn" disabled={loading}>
-                {loading
-                  ? <><LoaderCircle size={15} className="bdms-reg-spin" /> Creating Account...</>
-                  : <>Create Account <ArrowRight size={14} /></>
-                }
+              <button type="submit" className="rg-submit" disabled={loading}>
+                <span>
+                  {loading
+                    ? <><LoaderCircle size={14} className="rg-spin" /> Creating Account</>
+                    : <>Create Account <ArrowRight size={14} /></>
+                  }
+                </span>
               </button>
             </form>
 
-            <div className="bdms-reg-footer">
+            <div className="rg-footer">
               Already have an account?
               <Link to="/login">Sign in →</Link>
             </div>
