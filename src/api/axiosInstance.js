@@ -2,7 +2,7 @@ import axios from "axios";
 import { tokenUtils } from "../utils/tokenUtils";
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  baseURL: "https://bdms-web.onrender.com",
   headers: { "Content-Type": "application/json" },
 });
 

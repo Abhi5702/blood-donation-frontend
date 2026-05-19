@@ -157,10 +157,7 @@ const Navbar = ({ onMobileToggle, mobileOpen }) => {
 
         <div className="bdms-nav-spacer" />
 
-        <div className="bdms-nav-bell">
-          <Bell size={16} color="#374151" />
-          <span className="bdms-nav-bell-dot" />
-        </div>
+        
 
         <div className="bdms-nav-user" onClick={() => setDropdown(o => !o)}>
           <div className="bdms-nav-avatar">
@@ -186,12 +183,7 @@ const Navbar = ({ onMobileToggle, mobileOpen }) => {
                 <div className="bdms-nav-dd-name">{user?.fullName}</div>
                 <span className="bdms-nav-dd-role">{roleLabel}</span>
               </div>
-              <div
-                className="bdms-nav-dd-item"
-                onClick={() => { setDropdown(false); navigate("/profile"); }}
-              >
-                <User size={14} /> My Profile
-              </div>
+              
               <div className="bdms-nav-dd-divider" />
               <div
                 className="bdms-nav-dd-item danger"

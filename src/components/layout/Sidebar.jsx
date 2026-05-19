@@ -136,26 +136,11 @@ const Sidebar = ({ onClose }) => {
         })}
 
         <div className="bdms-sb-div" />
-        <div className="bdms-sb-section">Account</div>
-        <Link
-          to="/settings"
-          className={`bdms-sb-item ${location.pathname === "/settings" ? "active" : ""}`}
-          onClick={onClose}
-        >
-          <Settings size={16} className="bdms-sb-icon" />
-          Settings
-        </Link>
+        
 
         <div className="bdms-sb-spacer" />
 
-        <div className="bdms-sb-upgrade">
-          <div className="bdms-sb-upgrade-glow" />
-          <div className="bdms-sb-upgrade-title">BloodLink Pro ✦</div>
-          <div className="bdms-sb-upgrade-sub">
-            Unlock advanced analytics and priority matching
-          </div>
-          <button className="bdms-sb-upgrade-btn">Upgrade Plan</button>
-        </div>
+       
       </aside>
     </>
   );
